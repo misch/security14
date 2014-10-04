@@ -1,8 +1,13 @@
 package integrityCheck;
 
+import java.io.File;
+import java.io.IOException;
+import java.math.BigInteger;
+import java.nio.file.Files;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ChecksumCalculator {
 	
@@ -14,6 +19,23 @@ public class ChecksumCalculator {
 		} catch (NoSuchAlgorithmException e) {
 			System.out.println("Algorithm " + alg + " not available.");
 		} 
+	}
+	
+	public byte[] computeChecksum(File file){
+		List<String> lines = new ArrayList<String>();
+		String allLines = "";
+		
+		try {
+			lines = Files.readAllLines(file.toPath());
+		} catch (IOException e) {
+			System.out.println("Could not read lines.");
+		}
+
+		for (String line : lines){
+			allLines += line;
+		}
+		
+		return computeChecksum(allLines);
 	}
 	
 	public byte[] computeChecksum(String input){
