@@ -24,12 +24,18 @@ public class ChecksumCalculator {
 	public byte[] computeChecksum(File file){
 		List<String> lines = new ArrayList<String>();
 		String allLines = "";
-		
-		try {
-			lines = Files.readAllLines(file.toPath());
-		} catch (IOException e) {
-			System.out.println("Could not read lines.");
+		if (file.isFile()){
+			try {
+				lines = Files.readAllLines(file.toPath());
+			} catch (IOException e) {
+				System.out.println("Could not read lines.");
+			}
+		} else {
+			if (file.isDirectory()){
+				return computeChecksum("");
+			}
 		}
+
 
 		for (String line : lines){
 			allLines += line;

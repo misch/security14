@@ -118,6 +118,7 @@ public class IntegrityChecker {
 		
 		for (File file : folder.listFiles()){
 			if (file.isDirectory()){
+				files.add(file);
 				listFiles(file, files);
 			}
 			else{
