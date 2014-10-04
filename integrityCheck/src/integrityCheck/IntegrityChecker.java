@@ -44,12 +44,30 @@ public class IntegrityChecker {
 		HashMap<String,String> old_files = readIndexFile();
 		HashMap<String,String> new_files = indexFiles("C:/Users/Misch/TestIntegrity","");
 		
-		// TODO
-		// More detailed information about what changed
 		if (old_files.equals(new_files)){
 			System.out.println("Nothing changed!");
 		}else{
-			System.out.println("Something changed!");
+			System.out.println("Something changed");
+			
+			// Find deleted files
+			for (String key : old_files.keySet()){
+				if (!new_files.containsKey(key)){
+					System.out.println("Deleted: " + key);
+				}
+			}
+			
+			// Find added files
+			for (String key : new_files.keySet()){
+				if (!old_files.containsKey(key)){
+					System.out.println("Added: " + key);
+				}
+			}
+			
+			for (String key : new_files.keySet()){
+				if (old_files.containsKey(key) && !new_files.get(key).equals(old_files.get(key))){
+					System.out.println("Modified: " + key);
+				}
+			}
 		}
 
 	}
