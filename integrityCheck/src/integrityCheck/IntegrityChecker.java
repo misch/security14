@@ -11,16 +11,19 @@ import java.util.List;
 
 public class IntegrityChecker {
 
-	public HashMap<String,String> indexFiles(String pathToCheck, String pathToIndexFile){
-		// TODO
-		// - include ignore-file
+	List<String> ignore;
+	
+	public IntegrityChecker(String ignorePath){
+		this.ignore = readFile(ignorePath);
+	}
+	public HashMap<String,String> indexFiles(String pathToCheck, String pathToIndexFile, String ignorePath){
 		HashMap<String,String> hashMap = new HashMap<String,String>();
 		ChecksumCalculator checksumCalculator = new ChecksumCalculator("MD5");
 		
 		File folder = new File(pathToCheck);
 		
 		ArrayList<File> files = new ArrayList<File>();
-		getFiles(folder,files);
+		getFiles(folder,files, ignorePath);
 		
 		String checksums = "";
 		for (File file : files){
@@ -35,9 +38,9 @@ public class IntegrityChecker {
 		return hashMap;
 	}
 	
-	public void analyseFiles(String pathToCheck, String pathToIndexFile){
+	public void analyseFiles(String pathToCheck, String pathToIndexFile, String ignorePath){
 		HashMap<String,String> old_files = readIndexFile(pathToIndexFile);
-		HashMap<String,String> new_files = indexFiles(pathToCheck,"");
+		HashMap<String,String> new_files = indexFiles(pathToCheck,"",ignorePath);
 		
 		if (old_files.equals(new_files)){
 			System.out.println("Nothing changed!");
@@ -72,14 +75,7 @@ public class IntegrityChecker {
 	private HashMap<String,String> readIndexFile(String path){
 		HashMap<String, String> hashMap = new HashMap<String,String>();
 		
-		List<String> lines = new ArrayList<String>();
-		
-		File file = new File(path);
-		try {
-			lines = Files.readAllLines(file.toPath());
-		} catch (IOException e) {
-			System.out.println("Could not read index file.");
-		}
+		List<String> lines = readFile(path);
 
 		for (String line : lines){
 			String[] parts = line.split(": ");
@@ -88,6 +84,19 @@ public class IntegrityChecker {
 		
 		return hashMap;
 		
+	}
+	
+	private List<String> readFile(String path){
+		List<String> lines = new ArrayList<String>();
+		
+		File file = new File(path);
+		try {
+			lines = Files.readAllLines(file.toPath());
+		} catch (IOException e) {
+			System.out.println("Could not read file " + path);
+		}
+			
+			return lines;
 	}
 	
 	private void writeIndexFile(String checksums, String path) {
@@ -101,18 +110,18 @@ public class IntegrityChecker {
 		}
 	}
 	
-	private void getFiles(File folder, ArrayList<File> files){
-		
+	private void getFiles(File folder, ArrayList<File> files, String ignorePath){
 		for (File file : folder.listFiles()){
-			if (file.isDirectory()){
-				files.add(file);
-				getFiles(file, files);
-			}
-			else{
-				if (!file.getName().equals(".index")){
+			if (!ignore.contains(file.getAbsolutePath()))
+				if (file.isDirectory()){
 					files.add(file);
+					getFiles(file, files, ignorePath);
 				}
-			}
+				else{
+					if (!file.getName().equals(".index")){
+						files.add(file);
+					}
+				}
 		}
 	}
 }
