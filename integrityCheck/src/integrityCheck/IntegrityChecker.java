@@ -42,7 +42,7 @@ public class IntegrityChecker {
 		if (old_files.equals(new_files)){
 			System.out.println("Nothing changed!");
 		}else{
-			System.out.println("Something changed");
+			System.out.println("Something changed:");
 			
 			// Find deleted files
 			for (String key : old_files.keySet()){

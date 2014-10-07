@@ -22,40 +22,31 @@ public class ChecksumCalculator {
 	}
 
 	public byte[] computeChecksum(File file) {
-		byte[] digest = {0};
-	    byte[] buffer = new byte[1024];
-	    int numRead;
-	    if (file.isFile()) {
+		byte[] digest = { 0 };
+
+		if (file.isFile()) {
 			try (InputStream is = Files.newInputStream(file.toPath())) {
 				DigestInputStream dis = new DigestInputStream(is, md);
+
+				int numRead;
 				do {
-			           numRead = dis.read(buffer);
-			       } while (numRead != -1);
+					numRead = dis.read();
+				} while (numRead != -1);
+				
 				dis.close();
 				digest = md.digest();
 			} catch (IOException e) {
-				System.out
-						.println("Couldn't compute checksum for input stream.");
-				e.printStackTrace();
+				System.out.println("Couldn't compute checksum.");
 			}
-		} else{
-			md.update("".getBytes());
-			digest = md.digest();
-			return md.digest();
 		}
-		md.reset();
-		
-		return digest;
-	}
 
-	public byte[] computeChecksum(String input) {
-		md.update(input.getBytes());
-		return md.digest();
+		md.reset();
+
+		return digest;
 	}
 
 	public static String checksumToString(byte[] checksum) {
 		BigInteger bigInt = new BigInteger(1, checksum);
-		return String.format("%0" + (checksum.length << 1) + "X", bigInt)
-				.toLowerCase();
+		return String.format("%0" + (checksum.length << 1) + "X", bigInt).toLowerCase();
 	}
 }
