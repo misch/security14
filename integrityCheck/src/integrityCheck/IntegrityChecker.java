@@ -20,7 +20,7 @@ public class IntegrityChecker {
 		File folder = new File(pathToCheck);
 		
 		ArrayList<File> files = new ArrayList<File>();
-		listFiles(folder,files);
+		getFiles(folder,files);
 		
 		String checksums = "";
 		for (File file : files){
@@ -101,12 +101,12 @@ public class IntegrityChecker {
 		}
 	}
 	
-	private void listFiles(File folder, ArrayList<File> files){
+	private void getFiles(File folder, ArrayList<File> files){
 		
 		for (File file : folder.listFiles()){
 			if (file.isDirectory()){
 				files.add(file);
-				listFiles(file, files);
+				getFiles(file, files);
 			}
 			else{
 				if (!file.getName().equals(".index")){
