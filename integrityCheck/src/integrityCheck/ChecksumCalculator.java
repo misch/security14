@@ -2,55 +2,60 @@ package integrityCheck;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigInteger;
 import java.nio.file.Files;
+import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.List;
 
 public class ChecksumCalculator {
-	
+
 	MessageDigest md;
-	
-	public ChecksumCalculator(String alg){
+
+	public ChecksumCalculator(String alg) {
 		try {
 			this.md = MessageDigest.getInstance(alg);
 		} catch (NoSuchAlgorithmException e) {
 			System.out.println("Algorithm " + alg + " not available.");
-		} 
+		}
 	}
-	
-	public byte[] computeChecksum(File file){
-		List<String> lines = new ArrayList<String>();
-		String allLines = "";
-		if (file.isFile()){
-			try {
-				lines = Files.readAllLines(file.toPath());
+
+	public byte[] computeChecksum(File file) {
+		byte[] digest = {0};
+	    byte[] buffer = new byte[1024];
+	    int numRead;
+	    if (file.isFile()) {
+			try (InputStream is = Files.newInputStream(file.toPath())) {
+				DigestInputStream dis = new DigestInputStream(is, md);
+				do {
+			           numRead = dis.read(buffer);
+			       } while (numRead != -1);
+				dis.close();
+				digest = md.digest();
 			} catch (IOException e) {
-				System.out.println("Could not read lines.");
+				System.out
+						.println("Couldn't compute checksum for input stream.");
+				e.printStackTrace();
 			}
-		} else {
-			if (file.isDirectory()){
-				return computeChecksum("");
-			}
+		} else{
+			md.update("".getBytes());
+			digest = md.digest();
+			return md.digest();
 		}
-
-
-		for (String line : lines){
-			allLines += line;
-		}
+		md.reset();
 		
-		return computeChecksum(allLines);
+		return digest;
 	}
-	
-	public byte[] computeChecksum(String input){
+
+	public byte[] computeChecksum(String input) {
 		md.update(input.getBytes());
 		return md.digest();
 	}
-	
-	public static String checksumToString(byte[] checksum){
-		BigInteger bigInt = new BigInteger(1,checksum);
-		return String.format("%0" + (checksum.length << 1) + "X", bigInt).toLowerCase();
+
+	public static String checksumToString(byte[] checksum) {
+		BigInteger bigInt = new BigInteger(1, checksum);
+		return String.format("%0" + (checksum.length << 1) + "X", bigInt)
+				.toLowerCase();
 	}
 }
