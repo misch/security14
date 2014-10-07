@@ -14,7 +14,6 @@ public class IntegrityChecker {
 	public HashMap<String,String> indexFiles(String pathToCheck, String pathToIndexFile){
 		// TODO
 		// - include ignore-file
-		// - include (empty) folders
 		HashMap<String,String> hashMap = new HashMap<String,String>();
 		ChecksumCalculator checksumCalculator = new ChecksumCalculator("MD5");
 		
@@ -36,13 +35,9 @@ public class IntegrityChecker {
 		return hashMap;
 	}
 	
-	public void indexFiles(){
-		indexFiles("C:/Users/Misch/TestIntegrity","C:/Users/Misch/TestIntegrity/index.txt");
-	}
-
-	public void analyseFiles(){
-		HashMap<String,String> old_files = readIndexFile();
-		HashMap<String,String> new_files = indexFiles("C:/Users/Misch/TestIntegrity","");
+	public void analyseFiles(String pathToCheck, String pathToIndexFile){
+		HashMap<String,String> old_files = readIndexFile(pathToIndexFile);
+		HashMap<String,String> new_files = indexFiles(pathToCheck,"");
 		
 		if (old_files.equals(new_files)){
 			System.out.println("Nothing changed!");
@@ -63,6 +58,7 @@ public class IntegrityChecker {
 				}
 			}
 			
+			// Find modified files
 			for (String key : new_files.keySet()){
 				if (old_files.containsKey(key) && !new_files.get(key).equals(old_files.get(key))){
 					System.out.println("Modified: " + key);
@@ -94,11 +90,6 @@ public class IntegrityChecker {
 		
 	}
 	
-	private HashMap<String,String> readIndexFile(){
-		return readIndexFile("C:/Users/Misch/TestIntegrity/index.txt");
-	}
-	
-	
 	private void writeIndexFile(String checksums, String path) {
 		PrintWriter writer;
 		try {
@@ -110,10 +101,6 @@ public class IntegrityChecker {
 		}
 	}
 	
-	private void writeIndexFile(String checksums){
-		writeIndexFile(checksums,"C:/Users/Misch/TestIntegrity/index.txt");
-	}
-	
 	private void listFiles(File folder, ArrayList<File> files){
 		
 		for (File file : folder.listFiles()){
@@ -122,7 +109,7 @@ public class IntegrityChecker {
 				listFiles(file, files);
 			}
 			else{
-				if (!file.getName().startsWith("index")){
+				if (!file.getName().equals(".index")){
 					files.add(file);
 				}
 			}

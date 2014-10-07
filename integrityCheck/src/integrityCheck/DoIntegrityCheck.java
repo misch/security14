@@ -10,8 +10,8 @@ public class DoIntegrityCheck {
 	public static void main(String args[]){
 		IntegrityChecker checker = new IntegrityChecker();
 		
-		checker.indexFiles();
-		checker.analyseFiles();
+//		checker.indexFiles("C:/Users/Misch/TestIntegrity","C:/Users/Misch/TestIntegrity/.index");
+		checker.analyseFiles("C:/Users/Misch/TestIntegrity","C:/Users/Misch/TestIntegrity/.index");
 
 	}
 }
