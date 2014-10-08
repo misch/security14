@@ -6,23 +6,35 @@ import java.util.ArrayList;
 public class DoIntegrityCheck {
 	
 	static ArrayList<File> files = new ArrayList<File>();
-	private static final boolean INDEX = true;
-	private static final boolean ANALYSE = false;
 	
 	public static void main(String args[]){
-		String checkDirectory = "C:/Users/Misch/TestIntegrity";
-		String indexFilePath = "C:/Users/Misch/TestIntegrity/.index";
-		String ignorePath = "C:/Users/Misch/TestIntegrity/.ignore";
+		if (args.length == 0){
+			System.out.println("No valid mode. Please choose indexing or analysis!");
+			System.exit(0);
+		}
+		
+		String mode = args[0];
+		
+		String checkDirectory = System.getProperty("user.dir");
+		System.out.println(checkDirectory);
+		String indexFilePath = checkDirectory + "\\.index";
+		String ignorePath = checkDirectory + "\\.ignore";
 		
 		IntegrityChecker checker = new IntegrityChecker(ignorePath);
 		
-		boolean mode = ANALYSE;
 		
-		if (mode == INDEX){
+
+		
+		if (mode.equals("indexing")){
 			checker.indexFiles(checkDirectory,indexFilePath, ignorePath);
 		}
-		else
-			checker.analyseFiles(checkDirectory,indexFilePath, ignorePath);
-		
+		else{
+			if (mode.equals("analysis")){
+				checker.analyseFiles(checkDirectory,indexFilePath, ignorePath);
+			}
+			else{
+				System.out.println("No valid mode. Please choose indexing or analysis!");
+			}
+		}
 	}
 }
