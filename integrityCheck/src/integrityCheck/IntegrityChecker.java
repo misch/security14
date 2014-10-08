@@ -92,11 +92,9 @@ public class IntegrityChecker {
 		File file = new File(path);
 		try {
 			lines = Files.readAllLines(file.toPath());
-		} catch (IOException e) {
-			System.out.println("Could not read file " + path);
-		}
+		} catch (IOException e) {}
 			
-			return lines;
+		return lines;
 	}
 	
 	private void writeIndexFile(String checksums, String path) {
