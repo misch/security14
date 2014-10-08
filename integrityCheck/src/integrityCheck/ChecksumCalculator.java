@@ -8,7 +8,12 @@ import java.nio.file.Files;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-
+/**
+ * This class handles the computation of checksums for files.
+ * 
+ * @author Michèle Wyss (GitHub: {@link github.com/misch})
+ *
+ */
 public class ChecksumCalculator {
 
 	MessageDigest md;

@@ -9,6 +9,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+/**
+ * This class conatains methods to index and analyse file systems.
+ * 
+ * @author Michèle Wyss (GitHub: {@link github.com/misch})
+ *
+ */
 public class IntegrityChecker {
 
 	List<String> ignore;
