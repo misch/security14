@@ -4,7 +4,10 @@
 .classpath
 
 # Java
-*/bin
+*bin/
+
+
 
 # Executable jar's
-integrityCheck/integrityCheck.jar
+
+serie-01/integrityCheck/integrityCheck.jar
