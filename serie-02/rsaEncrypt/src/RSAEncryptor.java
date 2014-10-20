@@ -1,3 +1,4 @@
+import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.util.Random;
 
@@ -15,18 +16,23 @@ public class RSAEncryptor {
 
 	public static void main(String args[]) {
 		RSAEncryptor enc = new RSAEncryptor();
+		
+		String text = "hallallala";
+		char[] charArray = text.toCharArray();		
+		
+		int[] encrypted = new int[charArray.length];
+		for (int i = 0; i < charArray.length; i++){
+			encrypted[i] = enc.encrypt(BigInteger.valueOf(charArray[i])).intValue();
+		}
+		
+		char[] decoded = new char[charArray.length];
+		for (int i = 0; i < charArray.length; i++){
+			int decodedInt = enc.decrypt(BigInteger.valueOf(encrypted[i])).intValue();
+			decoded[i] = (char)(decodedInt); 
+			
+		}
 
-		char test = 'h' ;
-		BigInteger plaintext = BigInteger.valueOf(test);
-		
-		BigInteger encrypted = enc.encrypt(plaintext);
-		
-
-		System.out.println("Plaintext: " + plaintext.toString());
-		System.out.println("Ciphertext: " + encrypted.toString());
-		
-		BigInteger decrypted = enc.decrypt(encrypted);
-		System.out.println("Decrypted: " + decrypted.toString());
+		System.out.println(String.valueOf(decoded));
 	}
 
 	private void generateKeyPair() {
