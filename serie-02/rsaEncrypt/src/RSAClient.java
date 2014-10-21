@@ -1,7 +1,10 @@
+import java.awt.List;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.reflect.Array;
 import java.math.BigInteger;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class RSAClient implements Runnable {
@@ -26,8 +29,8 @@ public class RSAClient implements Runnable {
 			Scanner chat = new Scanner(System.in);
 			Scanner in = new Scanner(socket.getInputStream()); // input from server
 
-
 			/* Transmit own public key */
+			System.out.println("Transmit public key to server (unencrypted)...");
 			PrintWriter out = new PrintWriter(socket.getOutputStream()); // to send stuff to the server
 			out.println(encryptor.getPublicKey().toString());
 			out.flush();
@@ -35,18 +38,21 @@ public class RSAClient implements Runnable {
 			/* Read in server public key */
 			System.out.println("Received server's public key.");
 			serverKey = RSAKey.readKey(in);
+
 			while (true)
 			{						
-				int input = chat.nextInt();
-				
-				BigInteger ciphertext = encryptor.encrypt(BigInteger.valueOf(input), this.serverKey);
-				/* send typed text to the server */
-				out.println(ciphertext.toString());
+				String userInput = chat.nextLine();
+				String ciphertext = encryptor.encryptString(userInput, serverKey);
+				out.println(ciphertext);
 				out.flush();
 				
-				/* print whatever the server sent */
-				if(in.hasNext())
-					System.out.println(in.nextLine());
+				if(in.hasNext()){
+					/* read the server's input */
+					String inputStr = in.nextLine();
+					
+					String decryptedStr = encryptor.decriptString(inputStr);
+					System.out.println(decryptedStr);
+				}
 			}
 		}
 		catch (Exception e)
@@ -54,6 +60,7 @@ public class RSAClient implements Runnable {
 			e.printStackTrace();
 		} 
 	}
+
 	public static void main(String[] args) throws IOException
 	{
 		try 

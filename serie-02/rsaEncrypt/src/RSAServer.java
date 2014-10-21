@@ -29,6 +29,7 @@ public class RSAServer implements Runnable{
 			Scanner in = new Scanner(socket.getInputStream()); // input from client
 			
 			/* Transmit own public key */
+			System.out.println("Transmit public key to client (unencrypted)...");
 			out.println(encryptor.getPublicKey().toString());
 			out.flush();
 			
@@ -41,14 +42,13 @@ public class RSAServer implements Runnable{
 				if (in.hasNext())
 				{
 					/* read the client's input */
-					int input = in.nextInt(); 
-					
-					System.out.println("Client Said: " + input);
-					BigInteger decrypted = encryptor.decrypt(BigInteger.valueOf(input));
-					System.out.println("Decrypted: " + decrypted.intValue());
-					
-					/* send something back to client */
-					out.println("You Said: " + input);
+					String inputStr = in.nextLine();
+					String decryptedStr = encryptor.decriptString(inputStr);
+
+					/* send some stupid things to the client */
+					String plaintext = "Hello, this is the server. I received your message ["+inputStr+"] and decrypted it to: [" + decryptedStr + "]";
+					String ciphertext = encryptor.encryptString(plaintext, clientKey);
+					out.println(ciphertext);
 					out.flush();
 				}
 			}
@@ -58,7 +58,6 @@ public class RSAServer implements Runnable{
 			e.printStackTrace();
 		}	
 	}
-	
 	
     public static void main(String[] args) throws IOException {
         try
