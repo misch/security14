@@ -26,14 +26,15 @@ public class RSAClient implements Runnable {
 			Scanner chat = new Scanner(System.in);
 			Scanner in = new Scanner(socket.getInputStream()); // input from server
 
-			/* Read in server public key */
-			serverKey = getServerKey(in);
 
 			/* Transmit own public key */
 			PrintWriter out = new PrintWriter(socket.getOutputStream()); // to send stuff to the server
 			out.println(encryptor.getPublicKey().toString());
 			out.flush();
 			
+			/* Read in server public key */
+			System.out.println("Received server's public key.");
+			serverKey = RSAKey.readKey(in);
 			while (true)
 			{						
 				int input = chat.nextInt();
@@ -52,17 +53,6 @@ public class RSAClient implements Runnable {
 		{
 			e.printStackTrace();
 		} 
-	}
-	
-	private RSAKey getServerKey(Scanner in){
-		String serverPublicKey = in.nextLine();
-		
-		String[] keySplitted = serverPublicKey.split("\t");
-		String exponent = keySplitted[0].split(":")[1];
-		String modulus = keySplitted[1].split(":")[1];
-		
-		RSAKey serverKey = new RSAKey(new BigInteger(modulus) ,new BigInteger(exponent));
-		return serverKey;
 	}
 	public static void main(String[] args) throws IOException
 	{

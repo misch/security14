@@ -1,4 +1,5 @@
 import java.math.BigInteger;
+import java.util.Scanner;
 
 
 public class RSAKey {
@@ -20,5 +21,16 @@ public class RSAKey {
 	
 	public String toString(){
 		return ("e:" + this.getExp().intValue() + "\tn:" + this.getMod().intValue());
+	}
+	
+	public static RSAKey readKey(Scanner in){
+		String serverPublicKey = in.nextLine();
+		
+		String[] keySplitted = serverPublicKey.split("\t");
+		String exponent = keySplitted[0].split(":")[1];
+		String modulus = keySplitted[1].split(":")[1];
+		
+		RSAKey serverKey = new RSAKey(new BigInteger(modulus) ,new BigInteger(exponent));
+		return serverKey;
 	}
 }

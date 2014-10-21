@@ -32,8 +32,9 @@ public class RSAServer implements Runnable{
 			out.println(encryptor.getPublicKey().toString());
 			out.flush();
 			
-			/* Read in client public key */
-			clientKey = getClientKey(in);
+			/* Read in client's public key */
+			clientKey = RSAKey.readKey(in);
+			System.out.println("Received client's public key.");
 			
 			while (true)
 			{		
@@ -58,17 +59,6 @@ public class RSAServer implements Runnable{
 		}	
 	}
 	
-	private RSAKey getClientKey(Scanner in){
-		String serverPublicKey = in.nextLine();
-		
-		String[] keySplitted = serverPublicKey.split("\t");
-		String exponent = keySplitted[0].split(":")[1];
-		String modulus = keySplitted[1].split(":")[1];
-		
-		RSAKey clientKey = new RSAKey(new BigInteger(modulus) ,new BigInteger(exponent));
-		
-		return clientKey;
-	}
 	
     public static void main(String[] args) throws IOException {
         try
