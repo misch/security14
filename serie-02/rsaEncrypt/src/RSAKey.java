@@ -20,7 +20,8 @@ public class RSAKey {
 	}
 	
 	public String toString(){
-		return ("e:" + this.getExp().intValue() + "\tn:" + this.getMod().intValue());
+		// Note: Limited values for long are problematic... Instead, one could represent this as byte array!
+		return ("e:" + this.getExp().longValue() + "\tn:" + this.getMod().longValue());
 	}
 	
 	public static RSAKey readKey(Scanner in){

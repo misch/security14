@@ -15,28 +15,6 @@ public class RSAEncryptor {
 		generateKeyPair();
 	}
 
-	// public static void main(String args[]) {
-	// RSAEncryptor enc = new RSAEncryptor();
-	//
-	// String text = "hallallala";
-	// char[] charArray = text.toCharArray();
-	//
-	// int[] encrypted = new int[charArray.length];
-	// for (int i = 0; i < charArray.length; i++){
-	// encrypted[i] = enc.encrypt(BigInteger.valueOf(charArray[i])).intValue();
-	// }
-	//
-	// char[] decoded = new char[charArray.length];
-	// for (int i = 0; i < charArray.length; i++){
-	// int decodedInt =
-	// enc.decrypt(BigInteger.valueOf(encrypted[i])).intValue();
-	// decoded[i] = (char)(decodedInt);
-	//
-	// }
-	//
-	// System.out.println(String.valueOf(decoded));
-	// }
-
 	private void generateKeyPair() {
 		BigInteger[] primes = getPrimes();
 
@@ -45,8 +23,7 @@ public class RSAEncryptor {
 
 		this.n = p.multiply(q);
 
-		this.phi = (p.subtract(BigInteger.ONE).multiply(q
-				.subtract(BigInteger.ONE)));
+		this.phi = (p.subtract(BigInteger.ONE).multiply(q.subtract(BigInteger.ONE)));
 
 		this.e = BigInteger.valueOf(3); // maybe not too secure to start with 3?
 		while (!coprime(e, phi)) {
@@ -70,32 +47,24 @@ public class RSAEncryptor {
 		byte[] inputByte = plaintext.getBytes();
 
 		/* encrypt input bytes after splitting it in parts */
-		int lengthToSplit = 3;
+		int splitLength = 4;
 
 		boolean odd = false;
-		for (int i = 0; i < inputByte.length; i = i + lengthToSplit) {
-			/* Switch split length between 2 and 3 (avoid periodic stuff) */
-			if (odd){
-				lengthToSplit++;
-			}else{
-				lengthToSplit--;
-			}
+		for (int i = 0; i < inputByte.length; i = i + splitLength) {
 			
-			byte[] inputPart = new byte[lengthToSplit];
+			byte[] inputPart = new byte[splitLength];
 
-			if (inputByte.length < i + lengthToSplit) {
-				lengthToSplit = inputByte.length - i;
+			if (inputByte.length < i + splitLength) {
+				splitLength = inputByte.length - i;
 			}
 
-			for (int j = 0; j < lengthToSplit; j++) {
+			for (int j = 0; j < splitLength; j++) {
 				inputPart[j] = inputByte[i + j];
 			}
 
 			BigInteger ciphertext = this
 					.encrypt(new BigInteger(inputPart), key);
 			encrypted += " " + ciphertext.toString();
-			
-			odd = !odd;
 		}
 		return encrypted;
 	}
@@ -119,7 +88,7 @@ public class RSAEncryptor {
 	 *         numbers.
 	 */
 	private BigInteger[] getPrimes() {
-		int length = 14;
+		int length = 20;
 		BigInteger p = BigInteger.probablePrime(length, new Random());
 
 		BigInteger q;
