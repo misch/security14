@@ -29,6 +29,7 @@ public class LDAPClient {
 //		ldapClient.remove("freddy", ctx);
 //		ldapClient.add("freddy","I am Freddy. I'm not too smart, sadly.",ctx);
 //		System.out.println(ldapClient.search("freddy", ctx));
+		ldapClient.modify("freddy", "description", "Oh! I am suuuch a smart guy!",ctx);
 	}
 	
 	/**
@@ -50,7 +51,17 @@ public class LDAPClient {
 				System.out.println("Could not add entry.");
 				e.printStackTrace();
 			}
+	}
+	
+	public void modify(String name, String attributeName, String newValue, DirContext ctx){
+		ModificationItem[] modification = {new ModificationItem(DirContext.REPLACE_ATTRIBUTE, new BasicAttribute(attributeName,newValue))};   
 		
+		try {
+			ctx.modifyAttributes("cn="+name+", " + BASE_NAME, modification);
+		} catch (NamingException e) {
+			System.out.println("Could not add entry.");
+			e.printStackTrace();
+		}
 	}
 	
 	/**
