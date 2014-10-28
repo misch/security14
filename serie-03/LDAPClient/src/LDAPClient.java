@@ -1,20 +1,14 @@
 
 import java.util.Hashtable;
-import javax.naming.Context;
-import javax.naming.NamingEnumeration;
-import javax.naming.NamingException;
-import javax.naming.directory.Attributes;
-import javax.naming.directory.BasicAttributes;
-import javax.naming.directory.DirContext;
-import javax.naming.directory.InitialDirContext;
-import javax.naming.directory.SearchControls;
+import javax.naming.*;
+import javax.naming.directory.*;
 
 public class LDAPClient {
 
 	private static String BASE_NAME =  "ou=students, dc=security, dc=ch";
 	
 	public static void main (String args[]){
-		Hashtable env = new Hashtable();
+		Hashtable<String, String> env = new Hashtable<String, String>();
 		env.put(Context.INITIAL_CONTEXT_FACTORY,"com.sun.jndi.ldap.LdapCtxFactory");
 		env.put(Context.PROVIDER_URL, "ldap://54.68.0.145");
 		env.put(Context.SECURITY_AUTHENTICATION,"simple");
@@ -62,7 +56,7 @@ public class LDAPClient {
 	/**
 	 * This method can be used to remove a person.
 	 * @param name String
-	 * @param ctx DirContext
+	 * @param ctx DirContextit 
 	 */
 	public void remove(String name, DirContext ctx){
 		try {
@@ -92,7 +86,7 @@ public class LDAPClient {
 			String filter = "cn="+username;
 			
 			// Perform search
-			NamingEnumeration answer = ctx.search(BASE_NAME, filter, ctls);
+			NamingEnumeration<SearchResult> answer = ctx.search(BASE_NAME, filter, ctls);
 			
 			// Throw all the answers into a string.
 			while(answer.hasMore()){
