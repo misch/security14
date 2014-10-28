@@ -32,12 +32,17 @@ public class LDAPClient {
 
 		LDAPClient ldapClient = new LDAPClient();
 		System.out.println(ldapClient.search("*", ctx));
-		
+//		ldapClient.remove("freddy", ctx);
 //		ldapClient.add("freddy","I am Freddy. I'm not too smart, sadly.",ctx);
 //		System.out.println(ldapClient.search("freddy", ctx));
 	}
 	
-	
+	/**
+	 * This method can be used to add a person.
+	 * @param name String
+	 * @param description String
+	 * @param students DirContext
+	 */
 	public void add(String name, String description, DirContext students){
 		   Attributes attributes = new BasicAttributes(true);
 		   attributes.put("objectClass","person");
@@ -48,13 +53,25 @@ public class LDAPClient {
 			try {
 				students.bind("cn="+name+", " + BASE_NAME, null, attributes);
 			} catch (NamingException e) {
-				// TODO Auto-generated catch block
+				System.out.println("Could not add entry.");
 				e.printStackTrace();
 			}
 		
 	}
 	
-	
+	/**
+	 * This method can be used to remove a person.
+	 * @param name String
+	 * @param ctx DirContext
+	 */
+	public void remove(String name, DirContext ctx){
+		try {
+			ctx.unbind("cn="+name+", " + BASE_NAME);
+		} catch (NamingException e) {
+			System.out.println("Could not remove entry.");
+			e.printStackTrace();
+		}
+	}
 	
 	/**
 	 * This method performs a simple username search.
