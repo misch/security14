@@ -1,9 +1,10 @@
-import java.util.Hashtable;
 
+import java.util.Hashtable;
 import javax.naming.Context;
-import javax.naming.NameClassPair;
+import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 import javax.naming.directory.Attributes;
+import javax.naming.directory.BasicAttributes;
 import javax.naming.directory.DirContext;
 import javax.naming.directory.InitialDirContext;
 import javax.naming.directory.SearchControls;
@@ -11,6 +12,7 @@ import javax.naming.directory.SearchControls;
 public class LDAPClient {
 
 	private static String BASE_NAME =  "ou=students, dc=security, dc=ch";
+	
 	public static void main (String args[]){
 		Hashtable env = new Hashtable();
 		env.put(Context.INITIAL_CONTEXT_FACTORY,"com.sun.jndi.ldap.LdapCtxFactory");
@@ -30,6 +32,30 @@ public class LDAPClient {
 
 		LDAPClient ldapClient = new LDAPClient();
 		System.out.println(ldapClient.search("*", ctx));
+		
+//		ldapClient.add("freddy","I am Freddy. I'm not too smart, sadly.",ctx);
+//		System.out.println(ldapClient.search("freddy", ctx));
+	}
+	
+	
+	public void add(String name, String description, DirContext students){
+		   Attributes attributes = new BasicAttributes(true);
+		   attributes.put("objectClass","person");
+		   attributes.put("sn","Freddy");
+		   attributes.put("cn",name);
+		   attributes.put("description",description);
+		
+			try {
+				students.bind("cn="+name+", " + BASE_NAME, null, attributes);
+			} catch (NamingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		
+	}
+	
+	
+	
 	/**
 	 * This method performs a simple username search.
 	 * @param username - a string (can also contain some regex-stuff)
