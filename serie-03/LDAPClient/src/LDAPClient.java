@@ -37,16 +37,54 @@ public class LDAPClient {
 	 * @param attributeName String: name of the attribute that wants to be modified
 	 * @param newValue String: new value of the attribute
 	 */
-	public void modify(String cn, String attributeName, String newValue){
+	public void modifyAttribute(String cn, String attributeName, String newValue){
 		ModificationItem[] modification = {new ModificationItem(DirContext.REPLACE_ATTRIBUTE, new BasicAttribute(attributeName,newValue))};   
 		
 		try {
 			context.modifyAttributes("cn="+cn+", " + BASE_NAME, modification);
 		} catch (NamingException e) {
-			System.out.println("Could not add entry.");
+			System.out.println("Could not modify attribute.");
 			e.printStackTrace();
 		}
 	}
+	
+	
+	/**
+	 * This method can be used to add a new attribute to an existing entry.
+	 * @param cn String: used to identify the entry within students.security.ch
+	 * @param attributeName String: name of the attribute that wants to be modified
+	 * @param value String: new value of the attribute
+	 */
+	public void addAttribute(String cn, String attributeName, String value){
+		ModificationItem[] modification = {new ModificationItem(DirContext.ADD_ATTRIBUTE, new BasicAttribute(attributeName,value))};   
+		
+		try {
+			context.modifyAttributes("cn="+cn+", " + BASE_NAME, modification);
+		} catch (NamingException e) {
+			System.out.println("Could not add attribute.");
+			e.printStackTrace();
+		}
+	}
+	
+	
+	/**
+	 * This method can be used to remove an existing attribute from an entry.
+	 * @param cn String: used to identify the entry within students.security.ch
+	 * @param attributeName String: name of the attribute that wants to be removed
+	 */
+	public void removeAttribute(String cn, String attributeName){
+		ModificationItem[] modification = {new ModificationItem(DirContext.REMOVE_ATTRIBUTE, new BasicAttribute(attributeName))};   
+		
+		try {
+			context.modifyAttributes("cn="+cn+", " + BASE_NAME, modification);
+		} catch (NamingException e) {
+			System.out.println("Could not remove attribute.");
+			e.printStackTrace();
+		}
+	}
+	
+	
+	
 	
 	/**
 	 * This method can be used to remove an entry.

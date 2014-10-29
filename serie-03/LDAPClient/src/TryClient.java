@@ -11,11 +11,23 @@ public class TryClient {
 		DirContext ctx = setupContext();
 
 		LDAPClient ldapClient = new LDAPClient(ctx);
-		System.out.println(ldapClient.search("Peter Lustig"));
-//		ldapClient.remove("freddy");
+		
+
+		
 //		ldapClient.add("freddy","I am Freddy. I'm not too smart, sadly.");
 //		System.out.println(ldapClient.search("freddy"));
-//		ldapClient.modify("freddy", "description", "Oh! I am suuuch a smart guy!");
+		
+//		ldapClient.addAttribute("freddy", "telephoneNumber", "012 345 67 89");
+//		ldapClient.modifyAttribute("freddy", "description", "Oh! I am suuuch a smart guy!");
+//		ldapClient.removeAttribute("freddy", "telephoneNumber");
+		
+//		ldapClient.remove("freddy");
+		
+
+		
+		// List directory content
+		System.out.println(ldapClient.search("*"));
+
 	}
 	
 	public static DirContext setupContext(){
