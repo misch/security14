@@ -10,6 +10,9 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
 public class SMTPServerConnector {
+	
+	public SMTPServerConnector(){}
+	
    public void send(String from, String to, String subject, String text) {
       final String username = "";//change accordingly
       final String password = "";//change accordingly
