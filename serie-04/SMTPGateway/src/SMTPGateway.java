@@ -126,15 +126,20 @@ public class SMTPGateway implements Runnable {
 			out.println("250");
 			out.flush();
 
-			System.out.println("Transmission finished. Filter and forward...");
+			System.out.println("Transmission finished. Filter message...");
 			subject = filter(subject);
 			message = filter(message);
-
-			antiVirusScan(message);
-
-			/* Send the message through the fake server */
-			SMTPServerConnector mailer = new SMTPServerConnector();
-			mailer.send(from, to, subject, message);
+			
+			System.out.println("Scan for viruses...");
+			if (!foundVirus(message)){
+				System.out.println("No virus found. Send message...");
+				/* Send the message through the fake server */
+				SMTPServerConnector mailer = new SMTPServerConnector();
+				mailer.send(from, to, subject, message);
+				System.out.println("Message sent.");
+			}else{
+				System.out.println("Virus found OH MY GOD! Message discarded...");
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -170,12 +175,12 @@ public class SMTPGateway implements Runnable {
 		return filtered;
 	}
 
-	private void antiVirusScan(String text) {
+	private boolean foundVirus(String text) {
 		String path = System.getProperty("user.dir") + "\\tmpAV.txt";
 		PrintWriter writer;
 		try {
 			writer = new PrintWriter(path);
-			writer.print(text);
+			writer.print(text.trim());
 			writer.close();
 		} catch (FileNotFoundException e) {
 			System.out
@@ -183,19 +188,24 @@ public class SMTPGateway implements Runnable {
 		}
 
 		/* Call Avast Antivirus and scan file */
-//		String cmd = "\"C:\\Program Files\\AVAST Software\\Avast\\ashCmd.exe\" C:\\Users\\Misch\\security14\\serie-04\\SMTPGateway\\test.txt /_> C:\\Users\\Misch\\security14\\serie-04\\SMTPGateway\\results.txt";
-//		try {
-//			Process process = Runtime.getRuntime().exec("cmd /c " + cmd);
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}
-		
-		List<String> AVresults = readFile("test2.txt");
-		for(String AVresult : AVresults){
-			System.out.println(AVresult);
+		String cmd = "\"C:\\Program Files\\AVAST Software\\Avast\\ashCmd.exe\" C:\\Users\\Misch\\security14\\serie-04\\SMTPGateway\\tmpAV.txt /_> C:\\Users\\Misch\\security14\\serie-04\\SMTPGateway\\AVresults.txt";
+		try {
+			Process process = Runtime.getRuntime().exec("cmd /c " + cmd);
+			Thread.sleep(1000);
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-
-
+		
+		List<String> AVresults = readFile("AVresults.txt");
+		String firstLine = AVresults.get(0);
+		
+		String result = firstLine.split("\t")[1];
+		
+		if (result.trim().equals("OK")){
+			return false;
+		} else{
+			return true;
+		}
 	}
 
 	private List<String> readFile(String filename) {
