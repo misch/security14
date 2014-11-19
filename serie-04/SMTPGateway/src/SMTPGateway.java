@@ -1,12 +1,12 @@
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.nio.file.Files;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -129,20 +129,59 @@ public class SMTPGateway implements Runnable {
 			System.out.println("Transmission finished. Filter message...");
 			subject = filter(subject);
 			message = filter(message);
-			
+
 			System.out.println("Scan for viruses...");
-			if (!foundVirus(message)){
-				System.out.println("No virus found. Send message...");
-				/* Send the message through the fake server */
-				SMTPServerConnector mailer = new SMTPServerConnector();
-				mailer.send(from, to, subject, message);
-				System.out.println("Message sent.");
-			}else{
-				System.out.println("Virus found OH MY GOD! Message discarded...");
+			if (!foundVirus(message)) {
+				System.out.println("No virus found.");
+
+				System.out.println("Check if spam...");
+				String ipAddy = this.socket.getInetAddress().getHostAddress();
+				/* For testing:
+				 * No spam: */
+				 // String ipAddy = "83.218.18.1";
+				 /* Spam: */
+				 // String ipAddy = "80.218.18.1";
+				
+				if (!isSpamIP(ipAddy)) {
+					System.out.println("No spam. Send message...");
+					
+					/* Send the message through the fake server */
+					SMTPServerConnector mailer = new SMTPServerConnector();
+					mailer.send(from, to, subject, message);
+					
+					System.out.println("Message sent.");
+				}else{
+					System.out.println("You have been blacklisted! Spammer! Message discarded...");
+				}
+			} else {
+				System.out
+						.println("Virus found OH MY GOD! Message discarded...");
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	private boolean isSpamIP(String ipToCheck) {
+		System.out.println(ipToCheck);
+		String[] splitted = ipToCheck.split("\\.");
+		String[] reversed = new String[splitted.length];
+
+		for (int i = 0; i < splitted.length; i++) {
+			reversed[reversed.length - 1 - i] = splitted[i];
+		}
+		String reversedIp = String.join(".", reversed);
+		System.out.println(reversedIp);
+		String dnsblDomain = "dnsbl.sorbs.net";
+
+		try {
+			InetAddress addr = InetAddress.getByName(reversedIp+".dnsbl.sorbs.net");
+		} catch (UnknownHostException e) {
+			return false;
+		} catch (Throwable e) {
+			e.printStackTrace();
+		}
+		return true;
 	}
 
 	public static void main(String[] args) throws IOException {
@@ -154,7 +193,9 @@ public class SMTPGateway implements Runnable {
 			while (true) {
 				/* establish connection to client */
 				Socket s = serverSocket.accept();
-
+				
+				// TODO: How to check if this stuff works the same with IPv6?
+				System.out.println("Connected: " + s.getInetAddress().getHostAddress());
 				/* create a new server and start thread */
 				SMTPGateway chatServer = new SMTPGateway(s);
 
@@ -191,26 +232,26 @@ public class SMTPGateway implements Runnable {
 		String cmd = "\"C:\\Program Files\\AVAST Software\\Avast\\ashCmd.exe\" C:\\Users\\Misch\\security14\\serie-04\\SMTPGateway\\tmpAV.txt /_> C:\\Users\\Misch\\security14\\serie-04\\SMTPGateway\\AVresults.txt";
 		try {
 			Process process = Runtime.getRuntime().exec("cmd /c " + cmd);
-			Thread.sleep(1000);
+			Thread.sleep(2000);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+
 		List<String> AVresults = readFile("AVresults.txt");
 		String firstLine = AVresults.get(0);
-		
+
 		String result = firstLine.split("\t")[1];
-		
-		if (result.trim().equals("OK")){
+
+		if (result.trim().equals("OK")) {
 			return false;
-		} else{
+		} else {
 			return true;
 		}
 	}
 
 	private List<String> readFile(String filename) {
 		String path = System.getProperty("user.dir");
-		path += "\\"+filename;
+		path += "\\" + filename;
 		List<String> lines = new ArrayList<String>();
 
 		BufferedReader br;
@@ -218,7 +259,7 @@ public class SMTPGateway implements Runnable {
 			br = new BufferedReader(new FileReader(path));
 			String line;
 			while ((line = br.readLine()) != null) {
-				   lines.add(line);
+				lines.add(line);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
