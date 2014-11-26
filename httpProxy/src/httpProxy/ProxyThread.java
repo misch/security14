@@ -27,33 +27,37 @@ public class ProxyThread extends Thread {
 
             String inputLine;
             String urlToCall = "";
-            String request = "";
             
-            String host = "www.google.com"; // hardcoded for testing
+            String host = "";
             int port = 80;
 
-            Socket httpServerSocket = new Socket(host,port);
+            Socket httpServerSocket = null; 
             
-            InputStream serverIn = httpServerSocket.getInputStream();
-            PrintWriter serverOut = new PrintWriter(httpServerSocket.getOutputStream());
+            InputStream serverIn = null;
+            PrintWriter serverOut = null;
             
             while ((inputLine = browserIn.readLine()) != null) {
             	if (inputLine.isEmpty()){
             		break;
             	}
             	
-            	serverOut.println(inputLine + "\r\n");
-            	
             	/* Get url out of the request */
             	if(inputLine.split(" ")[0].equals("GET")){
             		urlToCall = inputLine.split(" ")[1];
+            		host = getHost(urlToCall);
             	}
+            	if (httpServerSocket == null){
+            		httpServerSocket = new Socket(host,port);
+            		serverOut = new PrintWriter(httpServerSocket.getOutputStream());
+            	}
+            	serverOut.println(inputLine + "\r\n");
             }
-
+            
             serverOut.flush();
             
+            serverIn = httpServerSocket.getInputStream();
 //            boolean blocked = URLisBlocked(urlToCall);
-            boolean blocked = true;
+            boolean blocked = false;
             if (blocked){
             	sendURLBlockedMessage(browserOut);
             }else{
@@ -74,7 +78,12 @@ public class ProxyThread extends Thread {
     	}
     }
     
-    private void sendURLBlockedMessage(DataOutputStream browserOut){
+    private String getHost(String urlToCall) {
+		String host = urlToCall.split("/")[2];
+		return host;
+	}
+
+	private void sendURLBlockedMessage(DataOutputStream browserOut){
     	try {
 			browserOut.write("HTTP/1.1 403 Forbidden\r\n".getBytes());
 	    	browserOut.write("Content-Type: text/plain; charset=UTF-8\r\n".getBytes());
