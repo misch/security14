@@ -1,11 +1,12 @@
 package httpProxy;
 
 import java.net.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.io.*;
 
 public class ProxyThread extends Thread {
     private Socket socket = null;
-    private static final int BUFFER_SIZE = 32768;
     
     public ProxyThread(Socket socket) {
         super();
@@ -14,8 +15,7 @@ public class ProxyThread extends Thread {
 
     public void run() {
     	try {
-//            PrintWriter browserOut = new PrintWriter(socket.getOutputStream());
-            BufferedWriter browserOut = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+            PrintWriter browserOut = new PrintWriter(socket.getOutputStream());
             BufferedReader browserIn = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
             String inputLine;
@@ -39,7 +39,7 @@ public class ProxyThread extends Thread {
             	}
             }
 
-            String host = "www.google.com";
+            String host = "www.google.com"; // hardcoded for testing
             int port = 80;
 
             Socket httpServerSocket = new Socket(host,port);
@@ -50,12 +50,14 @@ public class ProxyThread extends Thread {
             serverOut.println(request);
             serverOut.flush();
             
-            while ((inputLine = serverIn.readLine()) != null) {
-            	System.out.println(inputLine);
-//            	browserOut.println(inputLine);
-//            	browserOut.flush();
-            	browserOut.write(inputLine);
-            	browserOut.flush();
+            if (URLisBlocked(urlToCall)){
+            	sendURLBlockedMessage(browserOut);
+            }else{
+            	while ((inputLine = serverIn.readLine()) != null) {
+            		System.out.println(inputLine);
+            		browserOut.println(inputLine);
+            		browserOut.flush();
+            	}
             }
     	}catch(Exception e){
     		System.out.println("Exception");
@@ -70,6 +72,7 @@ public class ProxyThread extends Thread {
     	out.println("This content is sooo blocked by the proxy...");
     	out.flush();
     }
+    
     private boolean URLisBlocked(String url){
     	List<String> blacklist = readFile("blacklist.txt");
     	// TODO: Do more matching-stuff here instead of simple comparison
