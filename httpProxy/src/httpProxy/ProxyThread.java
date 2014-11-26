@@ -70,4 +70,32 @@ public class ProxyThread extends Thread {
     	out.println("This content is sooo blocked by the proxy...");
     	out.flush();
     }
+    private boolean URLisBlocked(String url){
+    	List<String> blacklist = readFile("blacklist.txt");
+    	// TODO: Do more matching-stuff here instead of simple comparison
+    	for (String badURL : blacklist) {
+    			if(url.equals(badURL)){
+    				return true;
+    			}
+    	}
+    	return false;
+    }
+    
+	private List<String> readFile(String filename) {
+		String path = System.getProperty("user.dir");
+		path += "\\" + filename;
+		List<String> lines = new ArrayList<String>();
+
+		BufferedReader br;
+		try {
+			br = new BufferedReader(new FileReader(path));
+			String line;
+			while ((line = br.readLine()) != null) {
+				lines.add(line);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return lines;
+	}
 }
