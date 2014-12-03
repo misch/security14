@@ -11,7 +11,7 @@ public class ProxyServer {
 
 	    try {
 	    	serverSocket = new ServerSocket(port);
-	        System.out.println("Gateway running. Waiting for client to connect... ");
+	        System.out.println("Proxy running. Waiting for browser to connect on port " + port);
 	    } catch (IOException e) {
 	    	System.err.println("Could not listen on port: " + args[0]);
 	    	System.exit(-1);
