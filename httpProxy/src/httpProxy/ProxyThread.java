@@ -25,9 +25,6 @@ public class ProxyThread extends Thread {
             DataOutputStream browserOut = new DataOutputStream(socket.getOutputStream());
             BufferedReader browserIn = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
-            String inputLine;
-            String urlToCall = "";
-            
             String host = "";
             int port = 80;
 
@@ -36,6 +33,7 @@ public class ProxyThread extends Thread {
             InputStream serverIn = null;
             PrintWriter serverOut = null;
             
+            String inputLine;
             while ((inputLine = browserIn.readLine()) != null) {
             	if (inputLine.isEmpty()){
             		break;
@@ -43,10 +41,8 @@ public class ProxyThread extends Thread {
             	
             	/* Get url out of the request */
             	if(inputLine.split(" ")[0].equals("GET")){
-            		urlToCall = inputLine.split(" ")[1];
-            		host = getHost(urlToCall);
-            	}
-            	if (httpServerSocket == null){
+            		String url = inputLine.split(" ")[1];
+            		host = getHost(url);
             		httpServerSocket = new Socket(host,port);
             		serverOut = new PrintWriter(httpServerSocket.getOutputStream());
             	}
@@ -56,8 +52,7 @@ public class ProxyThread extends Thread {
             serverOut.flush();
             
             serverIn = httpServerSocket.getInputStream();
-//            boolean blocked = URLisBlocked(urlToCall);
-            boolean blocked = false;
+            boolean blocked = hostIsBlocked(host);
             if (blocked){
             	sendURLBlockedMessage(browserOut);
             }else{
@@ -73,7 +68,6 @@ public class ProxyThread extends Thread {
                 browserOut.close();
             }
     	}catch(Exception e){
-    		System.out.println("Exception");
     		e.printStackTrace();
     	}
     }
@@ -97,11 +91,11 @@ public class ProxyThread extends Thread {
 
     }
     
-    private boolean URLisBlocked(String url){
+    private boolean hostIsBlocked(String host){
     	List<String> blacklist = readFile("blacklist.txt");
-    	// TODO: Do more matching-stuff here instead of simple comparison
+    	
     	for (String badURL : blacklist) {
-    			if(url.equals(badURL)){
+    			if(host.matches(badURL)){
     				return true;
     			}
     	}
@@ -120,6 +114,7 @@ public class ProxyThread extends Thread {
 			while ((line = br.readLine()) != null) {
 				lines.add(line);
 			}
+			br.close();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
