@@ -2,6 +2,7 @@ package httpProxy;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
@@ -10,6 +11,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,7 +42,18 @@ public class ProxyThread extends Thread {
 				sendURLBlockedMessage(browserOut);
 				return;
 			}
-			DataOutputStream cacheOut = new DataOutputStream(new FileOutputStream("chached_test.txt"));
+			
+			String cacheFile = getCacheFile(url);
+			
+			DataOutputStream cacheOut = null;
+			InputStream cacheIn = null;
+			boolean isCached = isCached(url);
+			if (isCached){
+				cacheIn = new FileInputStream(cacheFile);
+			}else{
+				cacheOut = new DataOutputStream(new FileOutputStream(cacheFile));
+			}
+			
 			
 			Socket httpServerSocket = new Socket(host, 80);
 
@@ -58,19 +73,51 @@ public class ProxyThread extends Thread {
 
 			final int BUFFER_SIZE = 32768;
 			byte by[] = new byte[BUFFER_SIZE];
-			int index = serverIn.read(by, 0, BUFFER_SIZE);
+			int index = 0;
+			if (isCached){
+				index = cacheIn.read(by,0,BUFFER_SIZE);
+			}else{
+				index = serverIn.read(by, 0, BUFFER_SIZE);
+			}
 			while (index != -1) {
 				browserOut.write(by, 0, index);
-				cacheOut.write(by,0,index);
-				index = serverIn.read(by, 0, BUFFER_SIZE);
+				
+				if (isCached){
+					index = cacheIn.read(by,0,BUFFER_SIZE);
+				}else{
+					cacheOut.write(by,0,index);
+					index = serverIn.read(by, 0, BUFFER_SIZE);
+				}
 			}
 			browserOut.flush();
 			browserOut.close();
-			cacheOut.flush();
-			cacheOut.close();
+			if (!isCached){
+				cacheOut.flush();
+				cacheOut.close();
+			}
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	private boolean isCached(String url) {
+		String filename = getCacheFile(url);
+		Path path = Paths.get(filename);
+
+		if (Files.exists(path)) {
+			System.out.println("Cached: " +url);
+		  return false;
+		}
+		System.out.println("Not cached: " + url);
+		return false;
+	}
+
+	private String getCacheFile(String url) {
+		ChecksumCalculator calc = new ChecksumCalculator("MD5");
+		byte[] checksum = calc.computeChecksum(url);
+		String cacheFile = ChecksumCalculator.checksumToString(checksum);
+		return "cache/"+cacheFile+".txt";
 	}
 
 	private String getHost(String urlToCall) {
