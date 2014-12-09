@@ -2,6 +2,8 @@ package httpProxy;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,12 +23,9 @@ public class ProxyThread extends Thread {
 
 	public void run() {
 		try {
-
-			DataOutputStream browserOut = new DataOutputStream(
-					socket.getOutputStream());
-			BufferedReader browserIn = new BufferedReader(
-					new InputStreamReader(socket.getInputStream()));
-
+			DataOutputStream browserOut = new DataOutputStream(socket.getOutputStream());
+			BufferedReader browserIn = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+			
 			String GETLine = browserIn.readLine();
 			while (GETLine != null && !GETLine.contains("GET")) {
 				GETLine = browserIn.readLine();
@@ -34,11 +33,13 @@ public class ProxyThread extends Thread {
 			String url = GETLine.split(" ")[1];
 			String host = getHost(url);
 
+			
 			if (hostIsBlocked(host)) {
 				sendURLBlockedMessage(browserOut);
 				return;
 			}
-
+			DataOutputStream cacheOut = new DataOutputStream(new FileOutputStream("chached_test.txt"));
+			
 			Socket httpServerSocket = new Socket(host, 80);
 
 			InputStream serverIn = httpServerSocket.getInputStream();
@@ -60,10 +61,13 @@ public class ProxyThread extends Thread {
 			int index = serverIn.read(by, 0, BUFFER_SIZE);
 			while (index != -1) {
 				browserOut.write(by, 0, index);
+				cacheOut.write(by,0,index);
 				index = serverIn.read(by, 0, BUFFER_SIZE);
 			}
 			browserOut.flush();
 			browserOut.close();
+			cacheOut.flush();
+			cacheOut.close();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -117,5 +121,20 @@ public class ProxyThread extends Thread {
 			e.printStackTrace();
 		}
 		return lines;
+	}
+	
+	private void writeToCache(String url, String checksums) {
+		String path = "";
+
+
+		PrintWriter writer;
+		try {
+			writer = new PrintWriter(path);
+			
+			writer.print(checksums);
+			writer.close();
+		} catch (FileNotFoundException e) {
+			System.out.println("Could not write index file.");
+		}
 	}
 }
